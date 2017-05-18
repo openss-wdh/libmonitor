@@ -34,4 +34,5 @@ MONITOR_WRAP_NAME(mpi_comm_rank_)(int *comm, int *rank, int *ierror)
     (*real_mpi_comm_size)(comm, &size, ierror);
     (*real_mpi_comm_rank)(comm, rank, ierror);
     monitor_set_mpi_size_rank(size, *rank);
+    monitor_mpi_post_comm_rank();
 }

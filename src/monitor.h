@@ -72,6 +72,8 @@ extern void monitor_mpi_pre_init(void);
 extern void monitor_init_mpi(int *argc, char ***argv);
 extern void monitor_fini_mpi(void);
 extern void monitor_mpi_post_fini(void);
+extern void monitor_mpi_post_comm_rank(void);
+extern void monitor_mpi_pcontrol(int level);
 
 /*
  *  Monitor support functions.

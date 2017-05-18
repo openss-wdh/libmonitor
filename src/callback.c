@@ -167,6 +167,18 @@ monitor_mpi_post_fini(void)
     MONITOR_DEBUG1("(default callback)\n");
 }
 
+void __attribute__ ((weak))
+monitor_mpi_post_comm_rank(void)
+{
+    MONITOR_DEBUG1("(default callback)\n");
+}
+
+void __attribute__ ((weak))
+monitor_mpi_pcontrol(int level)
+{
+    MONITOR_DEBUG("(default callback) level = %d\n", level);
+}
+
 int __attribute__ ((weak))
 monitor_wrap_main(int argc, char **argv, char **envp)
 {

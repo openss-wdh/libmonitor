@@ -52,11 +52,13 @@ typedef int mpi_init_fcn_t(int *, char ***);
 typedef int mpi_init_thread_fcn_t(int *, char ***, int, int *);
 typedef int mpi_finalize_fcn_t(void);
 typedef int mpi_comm_fcn_t(void *, int *);
+typedef int mpi_pcontrol_fcn_t(int);
 
 typedef void f_mpi_init_fcn_t(int *);
 typedef void f_mpi_init_thread_fcn_t(int *, int *, int *);
 typedef void f_mpi_finalize_fcn_t(int *);
 typedef void f_mpi_comm_fcn_t(int *, int *, int *);
+typedef int f_mpi_pcontrol_fcn_t(int);
 
 static mpi_init_fcn_t    *real_pmpi_init = NULL;
 static f_mpi_init_fcn_t  *real_pmpi_init_f0 = NULL;
@@ -82,6 +84,11 @@ static mpi_comm_fcn_t    *real_pmpi_comm_rank = NULL;
 static f_mpi_comm_fcn_t  *real_pmpi_comm_rank_f0 = NULL;
 static f_mpi_comm_fcn_t  *real_pmpi_comm_rank_f1 = NULL;
 static f_mpi_comm_fcn_t  *real_pmpi_comm_rank_f2 = NULL;
+
+static mpi_pcontrol_fcn_t    *real_pmpi_pcontrol = NULL;
+static f_mpi_pcontrol_fcn_t  *real_pmpi_pcontrol_f0 = NULL;
+static f_mpi_pcontrol_fcn_t  *real_pmpi_pcontrol_f1 = NULL;
+static f_mpi_pcontrol_fcn_t  *real_pmpi_pcontrol_f2 = NULL;
 
 /*
  *----------------------------------------------------------------------
@@ -297,7 +304,8 @@ MONITOR_WRAP_NAME(PMPI_Comm_rank)(void *comm, int *rank)
     ret = (*real_pmpi_comm_size)(comm, &size);
     ret = (*real_pmpi_comm_rank)(comm, rank);
     monitor_set_mpi_size_rank(size, *rank);
-
+    monitor_mpi_post_comm_rank();
+ 
     return (ret);
 }
 
@@ -308,7 +316,8 @@ MONITOR_WRAP_NAME(PMPI_Comm_rank)(void *comm, int *rank)
     MONITOR_GET_REAL_NAME_WRAP(rank_var, rank_fcn);	\
     (*size_var)(comm, &size, ierror);			\
     (*rank_var)(comm, rank, ierror);			\
-    monitor_set_mpi_size_rank(size, *rank);
+    monitor_set_mpi_size_rank(size, *rank); \
+    monitor_mpi_post_comm_rank();
 
 /*
  * In Fortran, MPI_Comm is always int.
@@ -332,4 +341,48 @@ MONITOR_WRAP_NAME(pmpi_comm_rank__)(int *comm, int *rank, int *ierror)
 {
     FORTRAN_COMM_RANK_BODY(real_pmpi_comm_size_f2, pmpi_comm_size__,
 			   real_pmpi_comm_rank_f2, pmpi_comm_rank__);
+}
+
+/*
+ *----------------------------------------------------------------------
+ *  PMPI_PCONTROL OVERRIDE FUNCTIONS
+ *----------------------------------------------------------------------
+ */
+
+int
+MONITOR_WRAP_NAME(PMPI_Pcontrol)(int level, int *ierror)
+{
+    int ret;
+
+    MONITOR_DEBUG("level = %d\n", level);              \
+    MONITOR_GET_REAL_NAME_WRAP(real_pmpi_pcontrol, PMPI_Pcontrol);
+    ret = (*real_pmpi_pcontrol) (level) ;
+    monitor_mpi_pcontrol(level);
+
+    return (ret);
+}
+
+#define FORTRAN_PCONTROL_BODY(var_name, fcn_name)\
+    int ret;                                           \
+    MONITOR_DEBUG("level = %d\n", level);              \
+    MONITOR_GET_REAL_NAME_WRAP(var_name, fcn_name);    \
+    ret = (*var_name) (level) ;                        \
+    monitor_mpi_pcontrol(level);
+
+int
+MONITOR_WRAP_NAME(pmpi_pcontrol)(int level, int *ierror)
+{
+    FORTRAN_PCONTROL_BODY(real_pmpi_pcontrol_f0, pmpi_pcontrol);
+}
+
+int
+MONITOR_WRAP_NAME(pmpi_pcontrol_)(int level, int *ierror)
+{
+    FORTRAN_PCONTROL_BODY(real_pmpi_pcontrol_f1, pmpi_pcontrol_);
+}
+
+int
+MONITOR_WRAP_NAME(pmpi_pcontrol__)(int level, int *ierror)
+{
+    FORTRAN_PCONTROL_BODY(real_pmpi_pcontrol_f2, pmpi_pcontrol__);
 }

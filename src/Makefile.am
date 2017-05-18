@@ -50,7 +50,8 @@ MONITOR_MPI_FILES =  \
 	mpi_init_c.c  mpi_init_thread_c.c  mpi_final_c.c  mpi_comm_c.c   \
 	mpi_init_f0.c mpi_init_thread_f0.c mpi_final_f0.c mpi_comm_f0.c  \
 	mpi_init_f1.c mpi_init_thread_f1.c mpi_final_f1.c mpi_comm_f1.c  \
-	mpi_init_f2.c mpi_init_thread_f2.c mpi_final_f2.c mpi_comm_f2.c
+	mpi_init_f2.c mpi_init_thread_f2.c mpi_final_f2.c mpi_comm_f2.c  \
+    mpi_pcontrol_c.c mpi_pcontrol_f0.c mpi_pcontrol_f1.c mpi_pcontrol_f2.c
 
 include_HEADERS = monitor.h
 bin_SCRIPTS =
